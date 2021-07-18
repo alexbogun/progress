@@ -12,6 +12,12 @@ intervals = (
     ('s', 1),
     )
 
+def pad_str(x, n):
+    if n:
+        d = int(np.log10(n))+1 # num. of digits
+        return (' '*d + str(x))[-d:]
+    else:
+        return str(x)
 
 def display_time(seconds, granularity=2):
     result = []
@@ -40,19 +46,24 @@ def start(s="", end="\n", beg="\r", add = ''):
     _tt= tm.time()
     return _tt
 
-def tick(s='', i=-1, n=0, end="\n", beg="\r", eta=False, add = ''):
+def tick(s='', i=-1, n=0, end="\n", beg="\r", eta=False, add = '', after=False, t=0):
     s_eta = ''
+    if t == 0:
+        t = _tt
     if s == '':
         s = _ss
-    if eta:
-        if i==0:
-            s_eta = ''
+    if eta and n and i!=-1:
+        if after:   #use tick after computation
+            s_eta = ' (ETA: ' + display_time( (tm.time() - t) / (i+1) * (n-i-1) ) +')'
         else:
-            s_eta = ' (ETA: ' + display_time( (tm.time() -_tt) / i * (n-i) ) +')' 
+            if i==0:  #use tick before computation
+                s_eta = ''
+            else:
+                s_eta = ' (ETA: ' + display_time( (tm.time() - t) / i * (n-i) ) +')' 
     if i<0:
         print(beg + s + ' ' +add + "               " , end=end)
     else:
-        print(beg + s + (" " if s !="" else "") + str(i+1) + ((" out of " + str(n)) if n!=0 else "") + s_eta + ' ' + add + "          ", end=end)
+        print(beg + s + (" " if s !="" else "") + pad_str(i+1,n) + (("/" + str(n)) if n!=0 else "") + s_eta + ' ' + add + "          ", end=end)
 
 
 def finish(s="", t=0, beg="\r", add = ''):
